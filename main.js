@@ -1,87 +1,58 @@
 /* ========================================
    Tania Rae — Main JS
+   NO Intersection Observer. NO hidden content.
+   Only: hamburger menu, smooth scroll, form handler.
    ======================================== */
 
 (function () {
   'use strict';
 
-  // --- Mobile nav toggle ---
-  const toggle = document.querySelector('.nav__toggle');
-  const navLinks = document.querySelector('.nav__links');
+  // --- Hamburger Menu Toggle ---
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('nav-links');
 
-  toggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    toggle.classList.toggle('active');
-    toggle.setAttribute('aria-expanded', isOpen);
-  });
-
-  // Close menu when a link is clicked
-  navLinks.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      navLinks.classList.remove('open');
-      toggle.classList.remove('active');
-      toggle.setAttribute('aria-expanded', 'false');
+  if (hamburger && navLinks) {
+    hamburger.addEventListener('click', function () {
+      hamburger.classList.toggle('active');
+      navLinks.classList.toggle('active');
     });
-  });
 
-  // --- Sticky nav shadow on scroll ---
-  const nav = document.querySelector('.nav');
-  let lastScroll = 0;
-
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    nav.classList.toggle('scrolled', y > 20);
-    lastScroll = y;
-  }, { passive: true });
-
-  // --- Intersection Observer: fade-in-up ---
-  const faders = document.querySelectorAll('.fade-in');
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
+    // Close menu when a nav link is clicked
+    navLinks.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
       });
-    }, {
-      threshold: 0.15,
-      rootMargin: '0px 0px -40px 0px'
     });
-
-    faders.forEach(el => observer.observe(el));
-  } else {
-    // Fallback: show everything
-    faders.forEach(el => el.classList.add('visible'));
   }
 
-  // --- Contact form (simple client-side feedback) ---
-  const form = document.querySelector('.contact__form');
+  // --- Smooth Scroll for anchor links ---
+  document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+    anchor.addEventListener('click', function (e) {
+      var targetId = this.getAttribute('href');
+      if (targetId === '#') return;
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const btn = form.querySelector('button[type="submit"]');
-    const originalText = btn.textContent;
-
-    btn.textContent = 'Sending…';
-    btn.disabled = true;
-
-    // Simulate send (replace with real endpoint)
-    setTimeout(() => {
-      btn.textContent = 'Sent! I\'ll be in touch ✨';
-      btn.style.background = '#b5e5b3';
-      btn.style.color = '#2d2926';
-      form.reset();
-
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.style.background = '';
-        btn.style.color = '';
-        btn.disabled = false;
-      }, 3000);
-    }, 800);
+      var target = document.querySelector(targetId);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
   });
 
+  // --- Contact Form Handler ---
+  var form = document.getElementById('contact-form');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var formData = new FormData(form);
+      var name = formData.get('name');
+
+      // Replace form with success message
+      form.innerHTML = '<div class="contact__form--success"><p>Thanks, ' +
+        name.replace(/[<>&"']/g, '') +
+        '! I\'ll be in touch soon. ☕</p></div>';
+    });
+  }
 })();
